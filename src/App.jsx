@@ -1,122 +1,65 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import TechnologyList from "./components/TechnologyList";
+import StackSidebar from "./components/StackSidebar";
+import Footer from "./components/Footer";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [technologies, setTechnologies] = useState([]);
+  const [myStack, setMyStack] = useState([]);
+
+  useEffect(() => {
+    fetch("/data/technologies.json")
+      .then((res) => res.json())
+      .then((data) => setTechnologies(data))
+      .catch((err) => console.error("Failed to load technologies:", err));
+  }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("myStack");
+    if (saved) setMyStack(JSON.parse(saved));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("myStack", JSON.stringify(myStack));
+  }, [myStack]);
+
+  const addToStack = (tech) => {
+    setMyStack((prev) => {
+      const withoutSameCategory = prev.filter((t) => t.category !== tech.category);
+      return [...withoutSameCategory, tech];
+    });
+  };
+
+  const removeFromStack = (id) => {
+    setMyStack((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const removeAll = () => setMyStack([]);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <Hero />
+      <section id="technologies" className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="lg:col-span-3">
+          <h2 className="text-3xl font-bold mb-1">
+            Explore the{" "}
+            <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+              Technologies
+            </span>
+          </h2>
+          <p className="text-gray-500 mb-8">Pick one technology per category to build your ideal stack.</p>
+          <TechnologyList technologies={technologies} myStack={myStack} addToStack={addToStack} />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <div className="lg:col-span-1">
+          <StackSidebar myStack={myStack} removeFromStack={removeFromStack} removeAll={removeAll} />
         </div>
       </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <Footer />
+    </div>
+  );
 }
 
-export default App
+export default App;
