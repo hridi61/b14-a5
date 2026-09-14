@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import TechnologyList from "./components/TechnologyList";
@@ -8,12 +10,20 @@ import Footer from "./components/Footer";
 function App() {
   const [technologies, setTechnologies] = useState([]);
   const [myStack, setMyStack] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     fetch("/data/technologies.json")
       .then((res) => res.json())
-      .then((data) => setTechnologies(data))
-      .catch((err) => console.error("Failed to load technologies:", err));
+      .then((data) => {
+        setTechnologies(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load technologies:", err);
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -26,20 +36,34 @@ function App() {
   }, [myStack]);
 
   const addToStack = (tech) => {
+    const alreadyAdded = myStack.some((t) => t.id === tech.id);
+    if (alreadyAdded) {
+      toast.warning(`${tech.name} is already in your stack!`);
+      return;
+    }
     setMyStack((prev) => {
       const withoutSameCategory = prev.filter((t) => t.category !== tech.category);
       return [...withoutSameCategory, tech];
     });
+    toast.success(`${tech.name} added to your stack!`);
   };
 
   const removeFromStack = (id) => {
+    const removedTech = myStack.find((t) => t.id === id);
     setMyStack((prev) => prev.filter((t) => t.id !== id));
+    if (removedTech) {
+      toast.info(`${removedTech.name} removed from your stack.`);
+    }
   };
 
-  const removeAll = () => setMyStack([]);
+  const removeAll = () => {
+    setMyStack([]);
+    toast.info("Stack cleared.");
+  };
 
   return (
     <div className="min-h-screen bg-white">
+      <ToastContainer position="top-right" autoClose={2000} />
       <Navbar />
       <Hero />
       <section id="technologies" className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -51,7 +75,12 @@ function App() {
             </span>
           </h2>
           <p className="text-gray-500 mb-8">Pick one technology per category to build your ideal stack.</p>
-          <TechnologyList technologies={technologies} myStack={myStack} addToStack={addToStack} />
+
+          {loading ? (
+            <p className="text-center text-gray-400 py-10">Loading technologies...</p>
+          ) : (
+            <TechnologyList technologies={technologies} myStack={myStack} addToStack={addToStack} />
+          )}
         </div>
         <div className="lg:col-span-1">
           <StackSidebar myStack={myStack} removeFromStack={removeFromStack} removeAll={removeAll} />
