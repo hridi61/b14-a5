@@ -14,9 +14,10 @@ function TechnologyCard({ tech, isSelected, onAdd }) {
       </div>
       <button
         onClick={() => onAdd(tech)}
-        disabled={isSelected}
         className={`w-full py-2 rounded-lg font-semibold text-sm ${
-          isSelected ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-gray-900 text-white hover:bg-gray-800"
+          isSelected
+            ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            : "bg-gray-900 text-white hover:bg-gray-800"
         }`}
       >
         {isSelected ? "✓ Added to Stack" : "Add to Stack"}
