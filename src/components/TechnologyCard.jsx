@@ -2,7 +2,7 @@ function TechnologyCard({ tech, isSelected, onAdd }) {
   return (
     <div className="border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
       <div className="flex items-start justify-between mb-3">
-        <img src={tech.icon} alt={tech.name} className="w-9 h-9 object-contain" width="36" height="36" />
+        <span className="text-4xl leading-none">{tech.icon}</span>
         <span className="text-xs font-semibold px-2 py-1 rounded-full bg-pink-50 text-pink-600">{tech.badge}</span>
       </div>
       <h3 className="font-bold text-lg mb-1">{tech.name}</h3>
